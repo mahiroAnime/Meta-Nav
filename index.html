@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080808">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="META-NAVI">
+  <meta name="description" content="Your personal Metaverse Navigator.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <title>META-NAVI</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --red: #ff2638;
+      --red2: #a9081a;
+      --black: #080808;
+      --panel: #111114;
+      --muted: #8c8c94;
+      --white: #f5f3f1;
+      --line: rgba(255,38,56,.38);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin:0; min-height:100%; background:var(--black); color:var(--white); font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    body { overflow-x:hidden; }
+    button { font:inherit; color:inherit; }
+    .app {
+      min-height:100svh; position:relative; overflow:hidden;
+      padding: calc(14px + var(--safe-top)) 18px calc(24px + var(--safe-bottom));
+      background:
+        radial-gradient(ellipse at 50% 35%, rgba(156,0,20,.19), transparent 52%),
+        linear-gradient(145deg,#080808 0%,#10090b 52%,#050505 100%);
+    }
+    .grain { pointer-events:none; position:fixed; inset:0; opacity:.09; z-index:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E"); }
+    .content { position:relative; z-index:1; max-width:560px; margin:0 auto; }
+    .top { display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); padding:5px 0 13px; }
+    .brand { font-weight:950; font-style:italic; letter-spacing:.11em; font-size:15px; transform:skew(-8deg); }
+    .brand span { color:var(--red); }
+    .status { font:700 9px/1.2 ui-monospace,monospace; letter-spacing:.13em; color:#ff6570; display:flex; align-items:center; gap:7px; }
+    .dot { width:6px;height:6px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);animation:pulse 1.5s infinite; }
+    .hero { text-align:center; padding:30px 0 12px; }
+    .eyebrow { color:#a8a0a1; font:700 10px ui-monospace,monospace; letter-spacing:.3em; }
+    h1 { font-size:clamp(36px,11vw,57px); line-height:.95; margin:10px 0 7px; font-weight:1000; letter-spacing:-.07em; font-style:italic; text-shadow:3px 3px 0 #6c0712,0 0 24px rgba(255,38,56,.25); }
+    h1 span { color:var(--red); }
+    .subtitle { font:600 10px ui-monospace,monospace; color:#aaa2a4; letter-spacing:.17em; }
+    .ring-wrap { height:270px; display:grid; place-items:center; position:relative; margin:9px 0 13px; }
+    .ring { width:230px;height:230px;border-radius:50%;border:1px solid rgba(255,38,56,.55); position:absolute; box-shadow:0 0 38px rgba(255,0,30,.09), inset 0 0 35px rgba(255,0,30,.07); }
+    .ring:before,.ring:after { content:"";position:absolute;inset:14px;border:1px dashed rgba(255,38,56,.38);border-radius:50%; }
+    .ring:after { inset:35px;border-style:solid;opacity:.55; }
+    .ring.outer { width:260px;height:260px;border-style:dashed;opacity:.55; animation:spin 28s linear infinite; }
+    .crosshair { position:absolute;width:270px;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent); }
+    .crosshair.v { transform:rotate(90deg); }
+    .scan-sweep { position:absolute;width:230px;height:230px;border-radius:50%;overflow:hidden; }
+    .scan-sweep:after { content:"";position:absolute;inset:0;background:conic-gradient(from 0deg,transparent 0 78%,rgba(255,38,56,.22) 90%,transparent 100%);animation:spin 5s linear infinite; }
+    .core { width:132px;height:132px; border:2px solid var(--red); transform:rotate(45deg); display:grid;place-items:center; background:linear-gradient(145deg,#21070b,#080808 70%); box-shadow:0 0 25px rgba(255,38,56,.3),inset 0 0 20px rgba(255,38,56,.18); cursor:pointer; transition:.2s; }
+    .core:active { transform:rotate(45deg) scale(.94); }
+    .core-inner { transform:rotate(-45deg); text-align:center; }
+    .core .sigil { font-size:34px;line-height:1; color:var(--red);text-shadow:0 0 16px var(--red); }
+    .core small { display:block;margin-top:8px;font:900 9px ui-monospace,monospace;letter-spacing:.16em; }
+    .orbit-label { position:absolute;font:700 8px ui-monospace,monospace;color:#d14b57;letter-spacing:.12em; }
+    .ol1 { top:12px;left:5%; }.ol2 { bottom:16px;right:2%; }.ol3 { top:35px;right:5%; }
+    .scan-state { text-align:center; min-height:19px; color:#ff6470; font:700 10px ui-monospace,monospace; letter-spacing:.17em; }
+    .panel { background:linear-gradient(135deg,rgba(30,17,20,.95),rgba(12,12,14,.96)); border:1px solid var(--line); padding:15px; margin-top:14px; clip-path:polygon(0 0,calc(100% - 13px) 0,100% 13px,100% 100%,13px 100%,0 calc(100% - 13px)); }
+    .panel-head { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; }
+    .panel-title { font:900 11px ui-monospace,monospace;letter-spacing:.18em; }
+    .tiny { color:var(--muted);font:9px ui-monospace,monospace; }
+    .grid { display:grid;grid-template-columns:repeat(2,1fr);gap:9px; }
+    .tile { min-height:75px;text-align:left;background:#0c0c0f;border:1px solid rgba(255,255,255,.12);padding:12px;position:relative;cursor:pointer;transition:.18s; }
+    .tile:active,.tile.active { border-color:var(--red);background:#210b10;transform:translateY(1px); }
+    .tile .ico { color:var(--red);font-size:19px;display:block;margin-bottom:8px; }
+    .tile strong { display:block;font:900 10px ui-monospace,monospace;letter-spacing:.1em; }
+    .tile small { color:var(--muted);font-size:9px;display:block;margin-top:4px; }
+    .data-row { display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.08);font:10px ui-monospace,monospace; }
+    .data-row span:first-child { color:var(--muted); }
+    .data-row span:last-child { color:#ff6671;text-align:right; }
+    .footer { text-align:center;padding:20px 0 5px;color:#62585b;font:8px ui-monospace,monospace;letter-spacing:.17em; }
+    .screen { display:none;animation:appear .25s ease; }
+    .screen.show { display:block; }
+    .back { border:1px solid var(--line);background:#16090c;padding:10px 13px;color:#ff6873;font:800 10px ui-monospace,monospace;letter-spacing:.1em;cursor:pointer;margin:14px 0; }
+    .screen h2 { font-size:25px;font-weight:1000;font-style:italic;letter-spacing:-.04em;margin:10px 0;color:var(--red); }
+    .screen p { color:#bbb1b3;font-size:13px;line-height:1.55; }
+    .field { width:100%;background:#080808;border:1px solid #5b2028;color:white;padding:12px;margin:6px 0 12px;outline:none;border-radius:0; }
+    .action { width:100%;border:1px solid var(--red);background:var(--red);color:#080808;padding:13px;font:950 11px ui-monospace,monospace;letter-spacing:.15em;cursor:pointer;margin-top:6px; }
+    .notice { color:#91888a;font-size:10px;line-height:1.5;margin-top:12px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes pulse { 50% { opacity:.35;box-shadow:0 0 2px var(--red); } }
+    @keyframes appear { from {opacity:0;transform:translateY(7px)} to {opacity:1;transform:none} }
+    @media (max-height:740px) { .hero{padding-top:20px}.ring-wrap{height:225px}.ring{width:190px;height:190px}.ring.outer{width:215px;height:215px}.scan-sweep{width:190px;height:190px}.core{width:112px;height:112px}.crosshair{width:220px} }
+    @media (prefers-reduced-motion:reduce) { *,*:before,*:after{animation:none!important;transition:none!important} }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="grain"></div>
+  <main class="content">
+    <header class="top">
+      <div class="brand">META<span>-</span>NAVI</div>
+      <div class="status"><i class="dot"></i> SYSTEM ONLINE</div>
+    </header>
+
+    <section id="home" class="screen show">
+      <div class="hero">
+        <div class="eyebrow">PERSONAL METAVERSE NAVIGATOR</div>
+        <h1>META<span>-</span>NAVI</h1>
+        <div class="subtitle">COGNITION • CONNECTION • ACCESS</div>
+      </div>
+      <div class="ring-wrap">
+        <div class="ring outer"></div><div class="ring"></div><div class="scan-sweep"></div>
+        <div class="crosshair"></div><div class="crosshair v"></div>
+        <div class="orbit-label ol1">COORDINATES: UNKNOWN</div>
+        <div class="orbit-label ol2">NAVIGATION READY</div>
+        <div class="orbit-label ol3">PHANTOM SIGNAL</div>
+        <button class="core" id="launch" aria-label="Launch Meta-Navi">
+          <span class="core-inner"><span class="sigil">✦</span><small>INITIALIZE</small></span>
+        </button>
+      </div>
+      <div class="scan-state" id="scanState">TAP TO INITIALIZE NAVIGATION</div>
+
+      <section class="panel">
+        <div class="panel-head"><div class="panel-title">QUICK ACCESS</div><div class="tiny">01 / 04</div></div>
+        <div class="grid">
+          <button class="tile" data-screen="navigator"><span class="ico">⌖</span><strong>NAVIGATOR</strong><small>Signal & coordinates</small></button>
+          <button class="tile" data-screen="palace"><span class="ico">♜</span><strong>PALACE DATA</strong><small>Personal notes</small></button>
+          <button class="tile" data-screen="personas"><span class="ico">◈</span><strong>PERSONAS</strong><small>Persona archive</small></button>
+          <button class="tile" data-screen="settings"><span class="ico">⚙</span><strong>SETTINGS</strong><small>System configuration</small></button>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><div class="panel-title">SYSTEM INFORMATION</div><div class="tiny">LIVE</div></div>
+        <div class="data-row"><span>CONNECTION</span><span>LOCAL INTERFACE</span></div>
+        <div class="data-row"><span>DEVICE</span><span id="device">MOBILE TERMINAL</span></div>
+        <div class="data-row"><span>STATUS</span><span>AWAITING USER</span></div>
+      </section>
+    </section>
+
+    <section id="navigator" class="screen">
+      <button class="back" data-home>← MAIN MENU</button>
+      <h2> NAVIGATOR </h2>
+      <p>Navigation module initialized. This is a personal interface simulation: it does not connect to a real Metaverse or detect supernatural locations.</p>
+      <div class="panel"><div class="panel-title">SIGNAL ANALYSIS</div><div class="data-row"><span>Signal strength</span><span>-- / NOT DETECTED</span></div><div class="data-row"><span>Coordinates</span><span>UNAVAILABLE</span></div><div class="data-row"><span>Target</span><span>NOT SELECTED</span></div></div>
+      <button class="action" id="rescan">SCAN SIGNAL</button>
+    </section>
+
+    <section id="palace" class="screen">
+      <button class="back" data-home>← MAIN MENU</button>
+      <h2>PALACE DATA</h2>
+      <p>Keep your own notes, ideas and target descriptions in this local panel.</p>
+      <label class="tiny" for="targetName">TARGET NAME</label>
+      <input class="field" id="targetName" placeholder="Enter a name">
+      <label class="tiny" for="targetNote">COGNITION / NOTES</label>
+      <textarea class="field" id="targetNote" rows="5" placeholder="Write your notes..."></textarea>
+      <button class="action" id="saveNotes">SAVE DATA</button>
+      <div class="notice" id="saveStatus">Saved locally on this device when you press SAVE DATA.</div>
+    </section>
+
+    <section id="personas" class="screen">
+      <button class="back" data-home>← MAIN MENU</button>
+      <h2>PERSONA ARCHIVE</h2>
+      <p>A small personal archive. Add a Persona name and a note to build your own collection.</p>
+      <input class="field" id="personaName" placeholder="Persona name">
+      <input class="field" id="personaArcana" placeholder="Arcana / type">
+      <button class="action" id="addPersona">ADD TO ARCHIVE</button>
+      <div class="panel" id="personaList"><div class="tiny">NO PERSONAS REGISTERED</div></div>
+    </section>
+
+    <section id="settings" class="screen">
+      <button class="back" data-home>← MAIN MENU</button>
+      <h2>SYSTEM SETTINGS</h2>
+      <div class="panel">
+        <div class="data-row"><span>INTERFACE</span><span>META-NAVI</span></div>
+        <div class="data-row"><span>THEME</span><span>PHANTOM RED</span></div>
+        <div class="data-row"><span>APP MODE</span><span id="appMode">BROWSER</span></div>
+        <div class="data-row"><span>VERSION</span><span>1.0.0</span></div>
+      </div>
+      <p>For the app-like full-screen experience, add this website to your iPhone Home Screen using Safari.</p>
+      <button class="action" id="installHint">HOW TO INSTALL ON IPHONE</button>
+      <p class="notice" id="installText">Safari → Share → Add to Home Screen → Add.</p>
+    </section>
+
+    <footer class="footer">META-NAVI INTERFACE // PERSONAL TERMINAL // V1.0.0</footer>
+  </main>
+</div>
+<script>
+  const screens = [...document.querySelectorAll('.screen')];
+  function showScreen(id) {
+    screens.forEach(s => s.classList.toggle('show', s.id === id));
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  document.querySelectorAll('[data-screen]').forEach(b => b.addEventListener('click', () => showScreen(b.dataset.screen)));
+  document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', () => showScreen('home')));
+  const scanState = document.getElementById('scanState');
+  function scan() {
+    scanState.textContent = 'INITIALIZING...';
+    setTimeout(() => scanState.textContent = 'SIGNAL NOT FOUND // DEMO MODE', 1300);
+    if (navigator.vibrate) navigator.vibrate(35);
+  }
+  document.getElementById('launch').addEventListener('click', scan);
+  document.getElementById('rescan').addEventListener('click', scan);
+
+  const targetName = document.getElementById('targetName');
+  const targetNote = document.getElementById('targetNote');
+  targetName.value = localStorage.getItem('mn_target_name') || '';
+  targetNote.value = localStorage.getItem('mn_target_note') || '';
+  document.getElementById('saveNotes').addEventListener('click', () => {
+    localStorage.setItem('mn_target_name', targetName.value);
+    localStorage.setItem('mn_target_note', targetNote.value);
+    document.getElementById('saveStatus').textContent = 'DATA SAVED SUCCESSFULLY.';
+  });
+
+  let personas = JSON.parse(localStorage.getItem('mn_personas') || '[]');
+  function renderPersonas() {
+    const list = document.getElementById('personaList');
+    list.innerHTML = '';
+    if (!personas.length) { list.innerHTML = '<div class="tiny">NO PERSONAS REGISTERED</div>'; return; }
+    personas.forEach((p, i) => {
+      const row = document.createElement('div');
+      row.className = 'data-row';
+      const name = document.createElement('span'); name.textContent = p.name + ' // ' + p.arcana;
+      const del = document.createElement('button'); del.textContent = '×'; del.setAttribute('aria-label','Delete '+p.name);
+      del.style.cssText = 'background:none;border:0;color:#ff6470;font-size:18px;padding:0 8px';
+      del.addEventListener('click', () => { personas.splice(i,1); localStorage.setItem('mn_personas',JSON.stringify(personas)); renderPersonas(); });
+      row.append(name,del); list.append(row);
+    });
+  }
+  document.getElementById('addPersona').addEventListener('click', () => {
+    const name = document.getElementById('personaName').value.trim();
+    const arcana = document.getElementById('personaArcana').value.trim() || 'UNKNOWN';
+    if (!name) return;
+    personas.push({name,arcana}); localStorage.setItem('mn_personas',JSON.stringify(personas));
+    document.getElementById('personaName').value = '';
+    document.getElementById('personaArcana').value = '';
+    renderPersonas();
+  });
+  renderPersonas();
+
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  document.getElementById('appMode').textContent = standalone ? 'HOME SCREEN APP' : 'BROWSER';
+  document.getElementById('device').textContent = /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'IPHONE TERMINAL' : 'MOBILE TERMINAL';
+  document.getElementById('installHint').addEventListener('click', () => {
+    document.getElementById('installText').textContent = 'Open this page in Safari → tap Share (square with arrow) → Add to Home Screen → enable Open as Web App if shown → Add.';
+  });
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  }
+</script>
+</body>
+</html>
